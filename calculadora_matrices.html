@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Matrices</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #0e0e0e;
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      margin: 0;
+      padding-top: 30px;
+    }
+    h1 {
+      color: #00bcd4;
+      margin-bottom: 10px;
+    }
+    .container {
+      background: #1b1b1b;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
+      max-width: 800px;
+      width: 90%;
+    }
+    .matrices-container {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .matrix {
+      display: grid;
+      gap: 8px;
+    }
+    input[type="number"] {
+      width: 50px;
+      height: 40px;
+      background: #121212;
+      border: 1px solid #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+    input[type="number"]:focus {
+      border-color: #00bcd4;
+      outline: none;
+      box-shadow: 0 0 8px #00bcd4;
+    }
+    select, button {
+      background-color: #00bcd4;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin: 5px;
+    }
+    select:hover, button:hover {
+      background-color: #0097a7;
+    }
+    .resultado {
+      margin-top: 20px;
+      text-align: center;
+      animation: aparecer 0.5s ease;
+    }
+    @keyframes aparecer {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    table {
+      border-collapse: collapse;
+      margin: 0 auto;
+      animation: brillo 1s ease;
+    }
+    @keyframes brillo {
+      from { box-shadow: 0 0 10px #00bcd4; }
+      to { box-shadow: none; }
+    }
+    td {
+      border: 1px solid #00bcd4;
+      padding: 10px;
+      width: 50px;
+      text-align: center;
+      border-radius: 6px;
+    }
+    .historial {
+      margin-top: 30px;
+      background: #161616;
+      border-radius: 12px;
+      padding: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .historial h3 {
+      color: #00bcd4;
+      margin-bottom: 10px;
+    }
+    .historial-item {
+      border-bottom: 1px solid #333;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧮 Calculadora de Matrices</h1>
+  <div class="container">
+    <div>
+      <label for="size">Tamaño de la matriz:</label>
+      <select id="size" onchange="crearMatrices()">
+        <option value="2">2 x 2</option>
+        <option value="3">3 x 3</option>
+      </select>
+    </div>
+    <div class="matrices-container">
+      <div id="matrixA" class="matrix"></div>
+      <div id="matrixB" class="matrix"></div>
+    </div>
+    <div>
+      <select id="operation">
+        <option value="sumar">Sumar</option>
+        <option value="restar">Restar</option>
+        <option value="multiplicar">Multiplicar</option>
+      </select>
+      <button onclick="calcular()">Calcular</button>
+      <button onclick="limpiarHistorial()">Limpiar historial</button>
+    </div>
+    <div class="resultado">
+      <h2>Resultado:</h2>
+      <div id="resultado"></div>
+    </div>
+    <div class="historial">
+      <h3>Historial de operaciones</h3>
+      <div id="historial"></div>
+    </div>
+  </div>
+  <script>
+    const historial = [];
+    function crearMatrices() {
+      const size = parseInt(document.getElementById('size').value);
+      const matrices = ['matrixA', 'matrixB'];
+      matrices.forEach(id => {
+        const contenedor = document.getElementById(id);
+        contenedor.innerHTML = '';
+        contenedor.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+        for (let i = 0; i < size * size; i++) {
+          const input = document.createElement('input');
+          input.type = 'number';
+          input.value = 0;
+          contenedor.appendChild(input);
+        }
+      });
+    }
+    function obtenerMatriz(id) {
+      const inputs = document.getElementById(id).getElementsByTagName('input');
+      const size = Math.sqrt(inputs.length);
+      const matriz = [];
+      for (let i = 0; i < size; i++) {
+        const fila = [];
+        for (let j = 0; j < size; j++) {
+          fila.push(parseFloat(inputs[i * size + j].value));
+        }
+        matriz.push(fila);
+      }
+      return matriz;
+    }
+    function mostrarResultado(matriz) {
+      const cont = document.getElementById('resultado');
+      cont.innerHTML = '';
+      const table = document.createElement('table');
+      matriz.forEach(fila => {
+        const tr = document.createElement('tr');
+        fila.forEach(valor => {
+          const td = document.createElement('td');
+          td.textContent = valor.toFixed(2);
+          tr.appendChild(td);
+        });
+        table.appendChild(tr);
+      });
+      cont.appendChild(table);
+    }
+    function agregarAlHistorial(operacion, matriz) {
+      const divHist = document.getElementById('historial');
+      const item = document.createElement('div');
+      item.classList.add('historial-item');
+      item.innerHTML = `<b>${operacion}</b>: [${matriz.map(fila => '[' + fila.join(', ') + ']').join(', ')}]`;
+      historial.push(item);
+      divHist.appendChild(item);
+    }
+    function limpiarHistorial() {
+      historial.length = 0;
+      document.getElementById('historial').innerHTML = '';
+    }
+    function calcular() {
+      const A = obtenerMatriz('matrixA');
+      const B = obtenerMatriz('matrixB');
+      const op = document.getElementById('operation').value;
+      const size = A.length;
+      const R = Array(size).fill().map(() => Array(size).fill(0));
+      if (op === 'sumar' || op === 'restar') {
+        for (let i = 0; i < size; i++) {
+          for (let j = 0; j < size; j++) {
+            R[i][j] = op === 'sumar' ? A[i][j] + B[i][j] : A[i][j] - B[i][j];
+          }
+        }
+      } else if (op === 'multiplicar') {
+        for (let i = 0; i < size; i++) {
+          for (let j = 0; j < size; j++) {
+            let suma = 0;
+            for (let k = 0; k < size; k++) {
+              suma += A[i][k] * B[k][j];
+            }
+            R[i][j] = suma;
+          }
+        }
+      }
+      mostrarResultado(R);
+      agregarAlHistorial(op.charAt(0).toUpperCase() + op.slice(1), R);
+    }
+    crearMatrices();
+  </script>
+</body>
+</html>
